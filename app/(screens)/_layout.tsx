@@ -13,6 +13,7 @@ const _layout = () => {
       <Stack.Screen name='support' options={{ title: "support" }} />
       <Stack.Screen name='changePassword' options={{ title: "Change Password" }} />
       <Stack.Screen name='profileEdit' options={{ title: "Profile Edit" }} />
+      <Stack.Screen name='getHelp' options={{ title: "Get Help" }} />
     </Stack>
   )
 }
