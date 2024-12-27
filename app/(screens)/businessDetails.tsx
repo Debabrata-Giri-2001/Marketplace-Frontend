@@ -142,9 +142,9 @@ const businessDetails = () => {
                   <Text size={'md'} bold >4.8</Text>
                   <AppIcon FeatherName="star" size={12} color={'black'} />
                   <Text className='ml-2' size={"md"}>Ratings</Text>
-                  <Text size={"sm"} className='mr-2 text-secondary-300'>(123 customer reviewed)</Text>
+                  <Text size={"sm"} className='mr-2 text-secondary-800'>(123 customer reviewed)</Text>
                 </HStack>
-                <Text className='text-secondary-300' size={'md'} >Nayapalli, Bhubaneswar</Text>
+                <Text className='text-secondary-800' size={'md'} >Nayapalli, Bhubaneswar</Text>
               </VStack>
             </VStack>
 

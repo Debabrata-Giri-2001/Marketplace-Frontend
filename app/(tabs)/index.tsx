@@ -229,7 +229,7 @@ const Home = () => {
                                 alt="logo"
                             />
                         </Box>
-                        <VStack className='self-start border'>
+                        <VStack className='self-start '>
                             <VStack>
                                 <Heading size={'xs'}>Psyso pro active Gym</Heading>
                             </VStack>
