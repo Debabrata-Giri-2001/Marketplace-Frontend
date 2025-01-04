@@ -23,6 +23,7 @@ const Home = () => {
     const { navigate, back } = useRouter();
     const { logout } = useAuth();
     const [activeIndex, setActiveIndex] = useState<any>(0);
+    const [pressedBox, setPressedBox] = useState<number | null>(null);
 
     const carousel = [
         { id: 1, source: 'https://as2.ftcdn.net/v2/jpg/01/28/27/25/1000_F_128272591_ihpgDbs0wxhxRuvQJ8NMi1yniMhBC4wl.jpg', offerHeading: 'Get Special Offer', subHeading: 'Up to', discount: '40%' },
@@ -31,6 +32,38 @@ const Home = () => {
         { id: 4, source: 'https://cdn1.vectorstock.com/i/1000x1000/96/35/grand-offer-sale-and-discount-banner-template-vector-14299635.jpg', offerHeading: 'Get Special Offer', subHeading: 'Up to', discount: '90%' }
     ];
 
+    const iconData = [
+        {
+            id: 1,
+            imageUrl: 'https://cdn.shopify.com/s/files/1/0141/5242/t/16/assets/fitsix-4-bright_LIQo.jpg?v=162012172235',
+            label: 'Gym',
+        },
+        {
+            id: 2,
+            imageUrl: 'https://assets.architecturaldigest.in/photos/64f85037ec0bc118bdd98aba/4:3/w_1440,h_1080,c_limit/Untitled%20design%20(14).png+++',
+            label: 'Restaurants',
+        },
+        {
+            id: 3,
+            imageUrl: 'https://enville.com/wp-content/uploads/Hiring-Corporate-Caterer-in-Party.jpg',
+            label: 'Caters',
+        },
+        {
+            id: 4,
+            imageUrl: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQccGkh0Icv-ktRgJzJQ_g2s2406QMMbNukXw&s',
+            label: 'Banquet Halls',
+        },
+        {
+            id: 5,
+            imageUrl: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ6w47b_VFeT1aTc6i2v-7tnC0omWr8VzQgfw&s',
+            label: 'Rental',
+        },
+        {
+            id: 6,
+            imageUrl: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQy7gI1QQd68vi46uA9AzeIIBpwWPyOgSnUCZiFr04xLLSuslOXnx0ttJzX6i-KX-7RMoo&usqp=CAU',
+            label: 'Interior designer',
+        },
+    ];
 
     const listData: {
         title: string;
@@ -121,7 +154,7 @@ const Home = () => {
                                 </MenuItem>
 
                             ))}
-                        </Menu>                        
+                        </Menu>
                     </HStack>
                 </HStack>
             </Box>
@@ -216,7 +249,7 @@ const Home = () => {
                 </HStack>
 
 
-                <Pressable onPress={()=>navigate('/businessDetails')} className='border-l-2 border-r-2 py-1 rounded-md m-2 mx-3'>
+                <Pressable onPress={() => navigate('/businessDetails')} className='border-l-2 border-r-2 py-1 rounded-md m-2 mx-3'>
                     <HStack className='p-2 justify-around'>
                         <Box >
                             <Image
@@ -262,6 +295,34 @@ const Home = () => {
                         <Heading size={'sm'}>Popular Category</Heading>
                         <AppIcon MaterialIconsName='arrow-forward' size={20} color={"#121212"} />
                     </HStack>
+
+                    <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+                        <Box className='mx-2 py-2 flex-row w-full roun bg-white drop-shadow-lg'>
+                            {iconData.map((item) => (
+                                <Box key={item?.id} className='mx-2 z-10 ' >
+                                    <Pressable className='p-2 justify-center items-center rounded-sm'
+                                        onPressIn={() => setPressedBox(item.id)}
+                                        onPressOut={() => setPressedBox(null)}
+                                        onPress={() => { }}
+                                    >
+
+                                        <VStack className='items-center'>
+                                            <Image
+                                                source={{ uri: item.imageUrl }}
+                                                alt={item.label}
+                                                style={{ height: 82, width: 82 }}
+                                                borderRadius={5}
+                                            />
+                                        </VStack>
+
+                                        <Box className='w-full mt-2 border rounded-sm'>
+                                            <Heading className='p-1 self-center' size={'xs'}>{item.label}</Heading>
+                                        </Box>
+                                    </Pressable>
+                                </Box>
+                            ))}
+                        </Box>
+                    </ScrollView>
 
                 </Box>
             </ScrollView>

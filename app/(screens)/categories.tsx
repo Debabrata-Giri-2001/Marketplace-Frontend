@@ -5,7 +5,6 @@ import React from 'react'
 
 const categories = () => {
     const categoriesType = useLocalSearchParams();
-
     return (
         <PrivateContainer title='Categories'>
 
