@@ -1,5 +1,6 @@
+// send email
 import { useToast } from "@/components/ui/toast";
-import { useAuth, useMutation } from "@/hooks";
+import { useAuth } from "@/hooks";
 import { useMemo, useState } from "react";
 import { Image, ScrollView, useWindowDimensions } from "react-native";
 import { useForm } from 'react-hook-form';
@@ -13,9 +14,10 @@ import { Pressable } from "@/components/ui/pressable";
 import { Spinner } from "@/components/ui/spinner";
 import AppInput from "@/components/mainComponents/AppInput";
 import { Alert, AlertText } from "@/components/ui/alert";
-import { useRouter } from "expo-router";
+import { useRouter, useNavigation } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { Link } from 'expo-router';
+import { useChange } from "@/hooks/useAPI";
 
 type FormInput = {
     key: string;
@@ -33,9 +35,9 @@ type FormData = {
 export default function Login(): JSX.Element {
     const toast = useToast();
     const { setUser, getUser, setToken } = useAuth();
-    const { mutation: login, isLoading } = useMutation();
+    const { change, isChanging } = useChange();
     const router = useRouter();
-    const [secureTextEntry, setSecureTextEntry] = useState(true);
+    const navigation = useNavigation();
 
     const { height } = useWindowDimensions();
     const {
@@ -44,20 +46,18 @@ export default function Login(): JSX.Element {
         formState: { errors },
     } = useForm<FormData>();
 
-    const handleLogin = async ({ username, password }: FormData) => {
+    const handleLogin = async ({ email }: FormData) => {
+        router.navigate('/otp-verify')
         try {
-            const res = await login(`user/login`, {
-                isAlert: true,
+            const res = await change(`user/login`, {
                 body: {
-                    email: username,
-                    password: password,
+                    email,
                 },
             });
-            if (res?.results?.success && res?.results?.data?.token) {
-                setToken(res?.results?.data?.token);
-                getUser();
-            }
-            console.log(res);
+            // if (res?.results?.success && res?.results?.data?.token) {
+            //     setToken(res?.results?.data?.token);
+            //     getUser();
+            // }
         } catch (error) {
             <Alert>
                 <AlertText>{error instanceof Error ? error?.message : 'Something Went wrong'}</AlertText>
@@ -68,12 +68,12 @@ export default function Login(): JSX.Element {
     const formInputs: FormInput[] = useMemo(
         () => [
             {
-                key: 'username',
+                key: 'email',
                 label: 'Email',
-                placeholder: 'Username',
+                placeholder: 'Email',
                 icon: { FeatherName: 'mail' },
                 rules: {
-                    required: 'Username is required',
+                    required: 'Email is required',
                     pattern: {
                         value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
                         message: 'Invalid email address',
@@ -81,32 +81,8 @@ export default function Login(): JSX.Element {
                 },
                 inputProps: { keyboardType: 'email-address', autoCapitalize: 'none' },
             },
-            {
-                key: 'password',
-                label: 'Password',
-                placeholder: 'Password',
-                icon: { FeatherName: 'lock' },
-                rules: {
-                    required: 'Password is required',
-                    minLength: {
-                        value: 6,
-                        message: 'Password must be at least 8 characters long',
-                    },
-                },
-                inputProps: {
-                    secureTextEntry,
-                    rightElement: (
-                        <Button className="text-xs color-black"
-                            onPress={() => setSecureTextEntry(!secureTextEntry)}>
-                            <ButtonText className="text-secondary-100">
-                                {secureTextEntry ? 'Show' : 'Hide'}
-                            </ButtonText>
-                        </Button>
-                    ),
-                },
-            },
         ],
-        [secureTextEntry],
+        [],
     );
 
     return (
@@ -143,26 +119,20 @@ export default function Login(): JSX.Element {
                             errorMessage={errors?.[input?.key]?.message}
                         />
                     ))}
-                    <HStack className="w-full flex justify-end ">
-                        <Pressable className="text-black px-4 my-3 text-sm "
-                            onPress={() => router.navigate("/reset-password")}
-                        >
-                            <Text>Forgot Password?</Text>
-                        </Pressable>
-                    </HStack>
+
 
                     <Pressable
-                        className="w-4/5 rounded-3xl bg-primary-500"
+                        className="w-4/5 rounded-3xl bg-primary-500 mt-4"
                         onPress={handleSubmit(handleLogin)}
                     >
-                        {isLoading ? (
+                        {isChanging ? (
                             <HStack className="py-2 justify-center">
                                 <Spinner className="self-center" color="white" />
                                 <Text className="text-secondary-500 font-semibold text-lg">Loading...</Text>
                             </HStack>
                         ) : (
                             <HStack className="py-2 justify-center">
-                                <Text className="text-secondary-500 font-semibold text-lg">Sign In</Text>
+                                <Text className="text-secondary-500 font-semibold text-lg">Send OTP</Text>
                             </HStack>
                         )}
                     </Pressable>
@@ -178,6 +148,11 @@ export default function Login(): JSX.Element {
                             </Text>
                         </Link>
                     </Box>
+                    <Link href="/mobile-login" className="mt-3">
+                        <Text className="text-blue-500 text-sm font-medium underline">
+                            Login with Mobile
+                        </Text>
+                    </Link>
                 </Center>
             </ScrollView>
         </Box>

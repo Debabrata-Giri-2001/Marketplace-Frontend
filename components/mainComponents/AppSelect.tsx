@@ -5,7 +5,6 @@ import {
     Modal,
     Pressable,
 } from 'react-native';
-import Icon from 'react-native-vector-icons/MaterialIcons';
 import { Box } from '../ui/box';
 import { Heading } from '../ui/heading';
 import { HStack } from '../ui/hstack';
@@ -31,16 +30,18 @@ type Props = {
 
 export default ({ onClose, onSelect, visible, data, selected, placeholder, title }: Props) => {
     const [searchTxt, setSearchTxt] = useState('');
-    const [searchRes, setSearchRes] = useState(() => data);
+    const [searchRes, setSearchRes] = useState<PickerItem[]>(data);
 
     useEffect(() => {
-        if (searchTxt.length === 11) {
-            const resArr = data.filter((item: PickerItem) =>
+        if (searchTxt.trim() === '') {
+            // If search text is empty, show all data
+            setSearchRes(data);
+        } else {
+            // Filter data based on search text
+            const filteredData = data.filter((item) =>
                 item.name.toLowerCase().includes(searchTxt.toLowerCase())
             );
-            setSearchRes(resArr);
-        } else {
-            setSearchRes([]);
+            setSearchRes(filteredData);
         }
     }, [searchTxt, data]);
 
@@ -49,17 +50,15 @@ export default ({ onClose, onSelect, visible, data, selected, placeholder, title
             animationType="slide"
             transparent={false}
             visible={visible}
-            onRequestClose={() => onClose()}
+            onRequestClose={onClose}
         >
-            <Box className='flex-1 m-2 p-2'>
+            <Box className="flex-1 m-2 p-2">
                 <VStack>
-                    <HStack className='mt-2 '>
-                        <Pressable onPress={() => onClose()}>
+                    <HStack className="mt-2">
+                        <Pressable onPress={onClose}>
                             <MaterialIcons name="arrow-back" size={25} color="#000" />
                         </Pressable>
-                        <Heading>
-                            {title}
-                        </Heading>
+                        <Heading>{title}</Heading>
                     </HStack>
 
                     <Input className="relative flex items-center w-full border rounded-md h-auto">
@@ -70,14 +69,19 @@ export default ({ onClose, onSelect, visible, data, selected, placeholder, title
                             placeholder={placeholder}
                             className="flex-1 px-3 py-2 text-gray-700 placeholder-gray-400 focus:outline-none"
                         />
-                        <AppIcon style={{ marginLeft: 12 }} MaterialIconsName={"search"} color={'gray'} size={20} />
+                        <AppIcon
+                            style={{ marginLeft: 12 }}
+                            MaterialIconsName="search"
+                            color="gray"
+                            size={20}
+                        />
                     </Input>
                 </VStack>
                 <FlatList
                     data={searchRes}
                     renderItem={({ item }) => (
-                        <Pressable className='p-1 border-b-2 border-primary-300' onPress={() => onSelect(item)}>
-                            <Text>{item.name}</Text>
+                        <Pressable className="p-1 border-2 border-primary-300 rounded-md my-1" onPress={() => onSelect(item)}>
+                            <Text className="text-primary-800" size='md'>{item.name}</Text>
                         </Pressable>
                     )}
                     keyExtractor={(item) => item.id.toString()}
@@ -87,5 +91,3 @@ export default ({ onClose, onSelect, visible, data, selected, placeholder, title
         </Modal>
     );
 };
-
-

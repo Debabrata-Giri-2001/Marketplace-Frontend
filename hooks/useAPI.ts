@@ -1,3 +1,4 @@
+import { BASE_URL } from '@/utils';
 import localStorage from '@react-native-async-storage/async-storage';
 import {useState} from 'react';
 import useSWR from 'swr';
@@ -6,10 +7,6 @@ export const getAccessToken = async () => {
   const accessToken = await localStorage.getItem('accessToken');
   return accessToken ? JSON.parse(accessToken) : null;
 };
-
-// export const BASE_URL = `https://api.arvindtechno.in/api/v1`;
-
-export const BASE_URL = `http://192.168.1.15:8080/api/v1`;
 
 type useFetchOptions = {
   BASE_URL: typeof BASE_URL | '/api';

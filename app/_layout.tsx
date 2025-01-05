@@ -28,8 +28,8 @@ export default function RootLayout() {
 
   useEffect(() => {
     if (isLoggedIn !== null) {
-      if (isLoggedIn) {
-        router.replace("/(tabs)");
+      if (!isLoggedIn) {
+        router.replace("/(auth)");
       } else {
         router.replace("/(tabs)");
       }

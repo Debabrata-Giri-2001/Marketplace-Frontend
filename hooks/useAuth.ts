@@ -33,7 +33,7 @@ const useAuth = create<AuthState>(set => ({
         set({user: undefined, isUserLoading: false});
         return;
       }
-      const res = await fetch(`${BASE_URL}/user/self`, {
+      const res = await fetch(`${BASE_URL}/get-profile`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
