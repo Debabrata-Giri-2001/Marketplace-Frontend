@@ -9,6 +9,7 @@ import { Image } from "react-native";
 import CountryPicker from "@/components/mainComponents/CountryPicker";
 import AppIcon from "@/components/mainComponents/AppIcon";
 import { Input, InputField, InputIcon } from "@/components/ui/input";
+import { Link } from "expo-router";
 
 const mobilelogin = () => {
 
@@ -46,7 +47,7 @@ const mobilelogin = () => {
         </Text>
 
 
-        <Input className="relative flex items-center w-full border rounded-md h-auto">
+        <Input className="relative flex items-center w-full border rounded-md h-auto px-3 mx-3">
           <Pressable onPress={() => setVisible(true)}>
             <HStack className="items-center">
               <Image
@@ -95,6 +96,11 @@ const mobilelogin = () => {
             </HStack>
           )}
         </Pressable>
+        <Link href="/login" className="mt-3">
+          <Text className="text-blue-500 text-sm font-medium underline">
+            Login with Email
+          </Text>
+        </Link>
       </Center>
 
       <CountryPicker

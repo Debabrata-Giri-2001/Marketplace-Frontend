@@ -4,11 +4,9 @@ import React from 'react'
 const _layout = () => {
   return (
     <Stack screenOptions={{ headerShown: false }} initialRouteName='index'>
-      <Stack.Screen name='cr-register' options={{ title: "Cr Register" }} />
       <Stack.Screen name='index' options={{ title: "On Boarding" }} />
       <Stack.Screen name='login' options={{ title: "Login" }} />
       <Stack.Screen name='register' options={{ title: "Register" }} />
-      <Stack.Screen name='reset-password' options={{ title: "Reset Password" }} />
       <Stack.Screen name='mobile-login' options={{ title: "Mobile Login" }} />
       <Stack.Screen name='otp-verify' options={{ title: "Otp Verify" }} />
     </Stack>
