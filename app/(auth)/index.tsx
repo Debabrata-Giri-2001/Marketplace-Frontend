@@ -52,7 +52,7 @@ const OnBoarding = () => {
         <Pressable className="p-2"
           onPress={() =>
             currentPage === OnboardingScreens.length - 1
-              ? router.replace('/login')
+              ? router.replace('/login-type')
               : flatListRef.current?.scrollToIndex({
                 animated: true,
                 index: OnboardingScreens.length - 1,

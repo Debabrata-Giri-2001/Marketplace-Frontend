@@ -14,7 +14,7 @@ import { Pressable } from "@/components/ui/pressable";
 import { Spinner } from "@/components/ui/spinner";
 import AppInput from "@/components/mainComponents/AppInput";
 import { Alert, AlertText } from "@/components/ui/alert";
-import { useRouter, useNavigation } from "expo-router";
+import { useRouter, useNavigation, useLocalSearchParams, } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { Link } from 'expo-router';
 import { useChange } from "@/hooks/useAPI";
@@ -34,6 +34,7 @@ type FormData = {
 
 export default function Login(): JSX.Element {
     const toast = useToast();
+    const { type } = useLocalSearchParams();
     const { setUser, getUser, setToken } = useAuth();
     const { change, isChanging } = useChange();
     const router = useRouter();
@@ -47,13 +48,14 @@ export default function Login(): JSX.Element {
     } = useForm<FormData>();
 
     const handleLogin = async ({ email }: FormData) => {
-        router.navigate('/otp-verify')
+        router.navigate('/create-profile')
         try {
             const res = await change(`user/login`, {
                 body: {
                     email,
                 },
             });
+
             // if (res?.results?.success && res?.results?.data?.token) {
             //     setToken(res?.results?.data?.token);
             //     getUser();

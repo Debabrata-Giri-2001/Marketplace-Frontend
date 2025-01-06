@@ -9,6 +9,8 @@ const _layout = () => {
       <Stack.Screen name='register' options={{ title: "Register" }} />
       <Stack.Screen name='mobile-login' options={{ title: "Mobile Login" }} />
       <Stack.Screen name='otp-verify' options={{ title: "Otp Verify" }} />
+      <Stack.Screen name='login-type' options={{ title: "Login Type" }} />
+      <Stack.Screen name='create-profile' options={{ title: "Create Profile" }} />
     </Stack>
   )
 }
