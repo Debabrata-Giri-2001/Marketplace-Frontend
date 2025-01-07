@@ -9,12 +9,19 @@ import { Image } from "react-native";
 import CountryPicker from "@/components/mainComponents/CountryPicker";
 import AppIcon from "@/components/mainComponents/AppIcon";
 import { Input, InputField, InputIcon } from "@/components/ui/input";
-import { Link } from "expo-router";
+import { Link, useLocalSearchParams, useRouter } from "expo-router";
+import { useChange } from "@/hooks/useAPI";
+import { useAuth } from "@/hooks";
+import { Alert, AlertText } from "@/components/ui/alert";
+import { useAuthProvider } from "@/constant/AuthContext";
 
 const mobilelogin = () => {
-
-  const [mobile, setMobile] = useState();
-
+  const router = useRouter();
+  const { setLoginMobile } = useAuthProvider();
+  const { setUser, getUser, setToken } = useAuth();
+  const { change, isChanging } = useChange();
+  const { type } = useLocalSearchParams();
+  const [mobile, setMobile] = useState<any>();
   const [visible, setVisible] = useState(false);
   const [selectedCountry, setSelectedCountry] = useState({
     code: 'IN',
@@ -22,13 +29,28 @@ const mobilelogin = () => {
     phone: '91',
   });
 
-  const handleChange = (text: string) => {
-
-  };
 
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
+    router.push({ pathname: '/create-profile' })
+    try {
+      const res = await change(`user/login`, {
+        body: {
+          phoneNumber: mobile,
+        },
+      });
 
+      if (res?.results?.success && res?.results?.data?.token) {
+        setToken(res?.results?.data?.token);
+        getUser();
+        setLoginMobile(mobile);
+        router.push({ pathname: '/create-profile', params: { mobile } });
+      }
+    } catch (error) {
+      <Alert>
+        <AlertText>{error instanceof Error ? error?.message : 'Something Went wrong'}</AlertText>
+      </Alert>
+    }
   };
 
 
@@ -77,7 +99,7 @@ const mobilelogin = () => {
             className="flex-1 px-3 py-2 text-gray-700 placeholder-gray-400 focus:outline-none"
             keyboardType="number-pad"
             value={mobile}
-            onChangeText={(text) => handleChange(text)}
+            onChangeText={(text) => setMobile(text)}
             placeholder="Enter Mobile Number..." />
         </Input>
 
@@ -96,11 +118,11 @@ const mobilelogin = () => {
             </HStack>
           )}
         </Pressable>
-        <Link href="/login" className="mt-3">
+        <Pressable onPress={() => router.push({ pathname: '/login', params: { type } })} className="mt-3">
           <Text className="text-blue-500 text-sm font-medium underline">
             Login with Email
           </Text>
-        </Link>
+        </Pressable>
       </Center>
 
       <CountryPicker

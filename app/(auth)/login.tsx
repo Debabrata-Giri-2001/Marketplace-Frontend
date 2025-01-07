@@ -18,6 +18,7 @@ import { useRouter, useNavigation, useLocalSearchParams, } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { Link } from 'expo-router';
 import { useChange } from "@/hooks/useAPI";
+import { useAuthProvider } from "@/constant/AuthContext";
 
 type FormInput = {
     key: string;
@@ -34,12 +35,11 @@ type FormData = {
 
 export default function Login(): JSX.Element {
     const toast = useToast();
+    const {setLoginEmail} = useAuthProvider();
     const { type } = useLocalSearchParams();
     const { setUser, getUser, setToken } = useAuth();
     const { change, isChanging } = useChange();
     const router = useRouter();
-    const navigation = useNavigation();
-
     const { height } = useWindowDimensions();
     const {
         control,
@@ -48,7 +48,7 @@ export default function Login(): JSX.Element {
     } = useForm<FormData>();
 
     const handleLogin = async ({ email }: FormData) => {
-        router.navigate('/create-profile')
+        router.push({ pathname: '/create-profile', params: { email } })
         try {
             const res = await change(`user/login`, {
                 body: {
@@ -56,10 +56,11 @@ export default function Login(): JSX.Element {
                 },
             });
 
-            // if (res?.results?.success && res?.results?.data?.token) {
-            //     setToken(res?.results?.data?.token);
-            //     getUser();
-            // }
+            if (res?.results?.success && res?.results?.data?.token) {
+                setToken(res?.results?.data?.token);
+                setLoginEmail(email)
+                router.push({ pathname: '/create-profile', params: { email } })
+            }
         } catch (error) {
             <Alert>
                 <AlertText>{error instanceof Error ? error?.message : 'Something Went wrong'}</AlertText>
@@ -150,11 +151,11 @@ export default function Login(): JSX.Element {
                             </Text>
                         </Link>
                     </Box>
-                    <Link href="/mobile-login" className="mt-3">
+                    <Pressable onPress={() => router.push({ pathname: '/mobile-login', params: { type } })} className="mt-3">
                         <Text className="text-blue-500 text-sm font-medium underline">
                             Login with Mobile
                         </Text>
-                    </Link>
+                    </Pressable>
                 </Center>
             </ScrollView>
         </Box>
