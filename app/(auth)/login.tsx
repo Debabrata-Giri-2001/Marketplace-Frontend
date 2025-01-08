@@ -1,7 +1,7 @@
 // send email
-import { useToast } from "@/components/ui/toast";
+import { Toast, ToastTitle, useToast } from "@/components/ui/toast";
 import { useAuth } from "@/hooks";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Image, ScrollView, useWindowDimensions } from "react-native";
 import { useForm } from 'react-hook-form';
 import { Box } from "@/components/ui/box";
@@ -19,6 +19,9 @@ import { StatusBar } from "expo-status-bar";
 import { Link } from 'expo-router';
 import { useChange } from "@/hooks/useAPI";
 import { useAuthProvider } from "@/constant/AuthContext";
+import { Divider } from "@/components/ui/divider";
+import AppIcon from "@/components/mainComponents/AppIcon";
+import { BASE_URL } from "@/utils";
 
 type FormInput = {
     key: string;
@@ -35,38 +38,16 @@ type FormData = {
 
 export default function Login(): JSX.Element {
     const toast = useToast();
-    const {setLoginEmail} = useAuthProvider();
+    const { setLoginEmail } = useAuthProvider();
     const { type } = useLocalSearchParams();
-    const { setUser, getUser, setToken } = useAuth();
+    const { setUser } = useAuth();
     const { change, isChanging } = useChange();
     const router = useRouter();
-    const { height } = useWindowDimensions();
     const {
         control,
         handleSubmit,
         formState: { errors },
     } = useForm<FormData>();
-
-    const handleLogin = async ({ email }: FormData) => {
-        router.push({ pathname: '/create-profile', params: { email } })
-        try {
-            const res = await change(`user/login`, {
-                body: {
-                    email,
-                },
-            });
-
-            if (res?.results?.success && res?.results?.data?.token) {
-                setToken(res?.results?.data?.token);
-                setLoginEmail(email)
-                router.push({ pathname: '/create-profile', params: { email } })
-            }
-        } catch (error) {
-            <Alert>
-                <AlertText>{error instanceof Error ? error?.message : 'Something Went wrong'}</AlertText>
-            </Alert>
-        }
-    };
 
     const formInputs: FormInput[] = useMemo(
         () => [
@@ -87,6 +68,61 @@ export default function Login(): JSX.Element {
         ],
         [],
     );
+
+
+    const handleLogin = async (email: FormData) => {
+        try {
+            const res = await change(`sendEmailOtp`, {
+                body: email
+            });
+            console.log("res", res)
+            if (res?.results?.success) {
+                setLoginEmail(email);
+                toast.show({
+                    placement: "top",
+                    render: ({ id }) => {
+                        const toastId = "toast-" + id;
+                        return (
+                            <Toast
+                                nativeID={toastId}
+                                className="px-5 py-3 gap-4 shadow-soft-1 items-center flex-row"
+                            >
+                                <AppIcon size={12} FeatherName="send" color={'green'} />
+                                <Divider
+                                    orientation="vertical"
+                                    className="h-[30px] bg-outline-200"
+                                />
+                                <ToastTitle size="sm">OTP sent successfully</ToastTitle>
+                            </Toast>
+                        );
+                    },
+                });
+                router.navigate('/otp-verify');
+            }
+        } catch (error) {
+            console.log("err->", error)
+            toast.show({
+                placement: "top",
+                render: ({ id }) => {
+                    const toastId = "toast-" + id;
+                    return (
+                        <Toast
+                            nativeID={toastId}
+                            className="px-5 py-3 gap-4 shadow-soft-1 items-center flex-row bg-red-500"
+                        >
+                            <Divider
+                                orientation="vertical"
+                                className="h-[30px] bg-outline-200"
+                            />
+                            <ToastTitle size="sm" className="text-white">
+                                {error instanceof Error ? error.message : "Something went wrong"}
+                            </ToastTitle>
+                        </Toast>
+                    );
+                },
+            });
+        }
+    };
 
     return (
         <Box className="flex-1 bg-white">

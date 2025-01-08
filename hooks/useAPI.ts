@@ -1,26 +1,25 @@
-import { BASE_URL } from '@/utils';
-import localStorage from '@react-native-async-storage/async-storage';
-import {useState} from 'react';
-import useSWR from 'swr';
+import { BASE_URL } from "@/utils";
+import localStorage from "@react-native-async-storage/async-storage";
+import { useState } from "react";
+import useSWR from "swr";
 
 export const getAccessToken = async () => {
-  const accessToken = await localStorage.getItem('accessToken');
+  const accessToken = await localStorage.getItem("accessToken");
   return accessToken ? JSON.parse(accessToken) : null;
 };
 
 type useFetchOptions = {
-  BASE_URL: typeof BASE_URL | '/api';
+  BASE_URL: typeof BASE_URL | "/api";
 };
 
 type MutationOptions = {
-  method?: 'POST' | 'PUT' | 'PATCH' | 'DELETE' | 'GET';
+  method?: "POST" | "PUT" | "PATCH" | "DELETE" | "GET";
   isFormData?: boolean;
   BASE_URL?: string;
   body?: any;
 };
 
 export const useFetch = <T>(path: string, options?: useFetchOptions) => {
-  // console.log({path});
   const url = options?.BASE_URL || BASE_URL;
   const data = useSWR<{
     data?: T;
@@ -33,14 +32,14 @@ export const useFetch = <T>(path: string, options?: useFetchOptions) => {
       limit?: string | any;
     };
   }>(
-    path?.includes('undefined') ? null : `${url}/${path}`,
+    path?.includes("undefined") ? null : `${url}/${path}`,
     async (args: any) => {
       const headers: HeadersInit_ = {};
       const token = await getAccessToken();
-      if (token) headers['x-access-token'] = token;
-      const _ = await fetch(args, {headers});
+      if (token) headers["Bearer"] = token;
+      const _ = await fetch(args, { headers });
       return await _.json();
-    },
+    }
   );
   return {
     ...data,
