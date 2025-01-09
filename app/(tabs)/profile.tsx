@@ -11,15 +11,19 @@ import { VStack } from '@/components/ui/vstack';
 import { useAuth } from '@/hooks';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
-import React from 'react'
+import React, { useEffect } from 'react'
 import { Image } from 'react-native';
 import { Avatar, AvatarImage } from '@/components/ui/avatar';
 import { Heading } from '@/components/ui/heading';
+import { useFetch } from '@/hooks/useAPI';
 
 const Profile = () => {
 
     const { logout, user } = useAuth();
     const { navigate } = useRouter();
+
+    const { data, isLoading, mutate } = useFetch<any>(`get-profile`);
+
     const listData: {
         title: string;
         subtitle?: string;
@@ -131,8 +135,8 @@ const Profile = () => {
                     <Avatar size="md">
                         <AvatarImage
                             source={{
-                                uri: user?.avatar
-                                    ? user?.avatar?.url
+                                uri: data?.user?.avatar
+                                    ? data?.avatar?.url
                                     : 'https://png.pngtree.com/png-vector/20220607/ourmid/pngtree-person-gray-photo-placeholder-man-silhouette-on-white-background-png-image_4853539.png',
                             }}
                         />
@@ -141,10 +145,10 @@ const Profile = () => {
                 <VStack className='items-center justify-between'>
                     <VStack>
                         <VStack>
-                            <Text size={'lg'}>Hello,<Text bold size={'lg'}>{user?.name}</Text></Text>
+                            <Text size={'lg'}>Hello,<Text bold size={'lg'}>{data?.user?.name}</Text></Text>
                         </VStack>
-                        <Text size={'sm'}>{user?.email}</Text>
-                        <Text size={'sm'}>{user?.phone ? `Phone number: ${user.phone}` : 'Phone number not available'}</Text>
+                        <Text size={'sm'}>{data?.user?.email}</Text>
+                        <Text size={'sm'}>{data?.user?.phoneNumber ? `Phone number: ${data?.user.phoneNumber}` : 'Phone number: not available'}</Text>
                     </VStack>
                 </VStack>
             </Pressable>

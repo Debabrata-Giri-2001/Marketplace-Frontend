@@ -5,7 +5,7 @@ import useSWR from "swr";
 
 export const getAccessToken = async () => {
   const accessToken = await localStorage.getItem("accessToken");
-  return accessToken ? JSON.parse(accessToken) : null;
+  return accessToken ? accessToken : null;
 };
 
 type useFetchOptions = {
@@ -22,7 +22,9 @@ type MutationOptions = {
 export const useFetch = <T>(path: string, options?: useFetchOptions) => {
   const url = options?.BASE_URL || BASE_URL;
   const data = useSWR<{
-    data?: T;
+    avatar: any;
+    data?: any;
+    user?:any;
     success: boolean;
     msg: string;
     pagination?: {
@@ -36,9 +38,13 @@ export const useFetch = <T>(path: string, options?: useFetchOptions) => {
     async (args: any) => {
       const headers: HeadersInit_ = {};
       const token = await getAccessToken();
-      if (token) headers["Bearer"] = token;
-      const _ = await fetch(args, { headers });
-      return await _.json();
+      if (token) headers["Authorization"] = `Bearer ${token}`;
+      const response = await fetch(args, { headers });
+      if (!response.ok) {
+        throw new Error(`Failed to fetch: ${response.statusText}`);
+      }
+      const data = await response.json();
+      return data;
     }
   );
   return {
@@ -46,7 +52,7 @@ export const useFetch = <T>(path: string, options?: useFetchOptions) => {
     response: data,
     success: data.data?.success,
     msg: data.data?.msg,
-    data: data.data?.data,
+    data: data.data,
     pagination: data?.data?.pagination,
   };
 };
