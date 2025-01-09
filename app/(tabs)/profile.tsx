@@ -20,7 +20,6 @@ const Profile = () => {
 
     const { logout, user } = useAuth();
     const { navigate } = useRouter();
-
     const listData: {
         title: string;
         subtitle?: string;
@@ -133,7 +132,7 @@ const Profile = () => {
                         <AvatarImage
                             source={{
                                 uri: user?.avatar
-                                    ? user?.avatar
+                                    ? user?.avatar?.url
                                     : 'https://png.pngtree.com/png-vector/20220607/ourmid/pngtree-person-gray-photo-placeholder-man-silhouette-on-white-background-png-image_4853539.png',
                             }}
                         />
@@ -145,7 +144,7 @@ const Profile = () => {
                             <Text size={'lg'}>Hello,<Text bold size={'lg'}>{user?.name}</Text></Text>
                         </VStack>
                         <Text size={'sm'}>{user?.email}</Text>
-                        <Text size={'sm'}>Phone number : {user?.phone}</Text>
+                        <Text size={'sm'}>{user?.phone ? `Phone number: ${user.phone}` : 'Phone number not available'}</Text>
                     </VStack>
                 </VStack>
             </Pressable>
@@ -159,7 +158,7 @@ const Profile = () => {
                             </Heading>
                         ) : (
                             <Pressable onPress={() => item?.onPress?.()}>
-                                <Box style={{borderColor:"#919191",borderWidth:0.5}} className='flex-row border my-1 rounded-md items-center w-full py-2 justify-between'>
+                                <Box style={{ borderColor: "#919191", borderWidth: 0.5 }} className='flex-row border my-1 rounded-md items-center w-full py-2 justify-between'>
                                     <HStack>
                                         <AppIcon {...item.leftIcon} />
                                         <Heading className='ml-2' size="sm">{item?.title}</Heading>

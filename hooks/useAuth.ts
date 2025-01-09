@@ -2,6 +2,8 @@ import localStorage from '@react-native-async-storage/async-storage';
 import {create} from 'zustand';
 import {User} from '../types';
 import {BASE_URL} from '../utils';
+
+
 type AuthState = {
   isUserLoading: boolean;
   user?: Partial<User>;
@@ -26,7 +28,6 @@ const useAuth = create<AuthState>(set => ({
     await localStorage.removeItem('accessToken');
   },
   getUser: async () => {
-    // console.log('getUser');
     try {
       const accessToken = await localStorage.getItem('accessToken');
       if (!accessToken) {
@@ -46,7 +47,7 @@ const useAuth = create<AuthState>(set => ({
       }
       if (res?.status === 200) {
         const data = await res.json();
-        const userData = data?.data;
+        const userData = data?.user;
         set({user: {...userData}, isUserLoading: false});
       }
     } catch (error) {

@@ -58,7 +58,7 @@ export const useChange = () => {
       const token = await getAccessToken();
       const url = options?.BASE_URL || BASE_URL;
       setIsChanging(true);
-      const method = options?.method || 'POST';
+      const method = options?.method || "POST";
       const body = options?.body
         ? options?.isFormData
           ? options?.body
@@ -66,26 +66,27 @@ export const useChange = () => {
         : `{}`;
       const headers: HeadersInit_ = options?.isFormData
         ? {}
-        : {'Content-Type': 'application/json'};
-      if (token) headers['x-access-token'] = token;
+        : { "Content-Type": "application/json" };
+      if (token) headers["Bearer"] = token;
       const fetchOptions = {
         method,
         headers,
         body,
       };
-      if (options?.method === 'GET') delete fetchOptions.body;
+      if (options?.method === "GET") delete fetchOptions.body;
       const response = await fetch(`${url}/${path}`, fetchOptions);
 
       const status = response.status;
       const results = await response.json();
       setIsChanging(false);
-      return {results, status};
+      return { results, status };
     } catch (error) {
+      console.log("error on  ch", error);
       setIsChanging(false);
       throw new Error(
-        error instanceof Error ? error.message : 'Something went wrong',
+        error instanceof Error ? error.message : "Something went wrong"
       );
     }
   };
-  return {change, isChanging};
+  return { change, isChanging };
 };

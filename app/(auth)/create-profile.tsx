@@ -2,21 +2,37 @@ import { Box } from '@/components/ui/box';
 import React, { useState } from 'react';
 import { VStack } from '@/components/ui/vstack';
 import { Text } from '@/components/ui/text';
-import { Alert, Image, ScrollView } from 'react-native';
+import { Alert, Image, Pressable, ScrollView } from 'react-native';
 import { Button } from '@/components/ui/button';
 import { Input, InputField } from '@/components/ui/input';
 import AppIcon from '@/components/mainComponents/AppIcon';
 import * as ImagePicker from 'expo-image-picker';
-import { useLocalSearchParams } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 import { useAuthProvider } from '@/constant/AuthContext';
+import { Toast, ToastTitle, useToast } from '@/components/ui/toast';
+import { Divider } from '@/components/ui/divider';
+import { useChange } from '@/hooks/useAPI';
+import { HStack } from '@/components/ui/hstack';
+import { Spinner } from '@/components/ui/spinner';
 
-const createprofile = () => {
-    const { loginType,loginEmail,loginMobile } = useAuthProvider();
+const CreateProfile = () => {
+    const toast = useToast();
+    const { userID } = useLocalSearchParams();
+    const { change, isChanging } = useChange();
+    const { loginType, loginEmail, loginMobile } = useAuthProvider();
+    
+    // Destructuring loginEmail and loginMobile to get their values
+    const { email } = loginEmail || {};
+    const { phoneNumber } = loginMobile || {};
+
     const [formData, setFormData] = useState<any>({
         name: '',
-        email: loginEmail || '',
-        phoneNumber: loginMobile || '',
-        avatarUrl: 'https://cdn-icons-png.flaticon.com/512/9131/9131529.png',
+        email: email || '',
+        phoneNumber: phoneNumber || '',
+        avatar: {
+            public_id: 'cdn-icons-png.flaticon.com/512/9131/9131529.png',
+            url: 'https://cdn-icons-png.flaticon.com/512/9131/9131529.png'
+        },
         role: loginType,
     });
 
@@ -40,8 +56,67 @@ const createprofile = () => {
         setFormData((prev: any) => ({ ...prev, [key]: value }));
     };
 
-    const handleSubmit = () => {
-        Alert.alert('Profile Created', 'Your profile has been successfully created.');
+    const formDataFn = new FormData();
+
+    const handleSubmit = async () => {
+        formDataFn.append('email', formData.email);
+        formDataFn.append('name', formData.name);
+        formDataFn.append('role', formData.role);
+        formDataFn.append('avatar', formData.avatarUrl || formData.avatar.url);
+        try {
+            const res = await change(`update-profile/${userID}`, {
+                isFormData: true,
+                body: formDataFn,
+            });
+
+            if (res?.results?.success) {
+                toast.show({
+                    placement: "top",
+                    render: ({ id }) => {
+                        const toastId = "toast-" + id;
+                        return (
+                            <Toast
+                                nativeID={toastId}
+                                className="px-5 py-3 gap-4 shadow-soft-1 items-center flex-row"
+                            >
+                                <AppIcon size={12} FeatherName="send" color={'green'} />
+                                <Divider
+                                    orientation="vertical"
+                                    className="h-[30px] bg-outline-200"
+                                />
+                                <ToastTitle size="sm">Account Created Successfully</ToastTitle>
+                            </Toast>
+                        );
+                    },
+                });
+                if (loginType === "BusinessOwner") {
+                    router.navigate('/register')
+                } else {
+                    router.navigate('/(tabs)')
+                }
+            }
+        } catch (error: any) {
+            toast.show({
+                placement: "top",
+                render: ({ id }) => {
+                    const toastId = "toast-" + id;
+                    return (
+                        <Toast
+                            nativeID={toastId}
+                            className="px-5 py-3 gap-4 shadow-soft-1 items-center flex-row bg-red-500"
+                        >
+                            <Divider
+                                orientation="vertical"
+                                className="h-[30px] bg-outline-200"
+                            />
+                            <ToastTitle size="sm" className="text-white">
+                                {error instanceof Error ? error.message : "Something went wrong"}
+                            </ToastTitle>
+                        </Toast>
+                    );
+                },
+            });
+        }
     };
 
     return (
@@ -91,9 +166,9 @@ const createprofile = () => {
                         <InputField
                             placeholder="Email"
                             value={formData.email}
-                            editable={!loginEmail} // Make editable only if not pre-filled
+                            editable={!email} // Make editable only if not pre-filled
                             onChangeText={(value) => handleInputChange('email', value)}
-                            className={`flex-1 px-3 py-2 text-gray-700 placeholder-gray-400 focus:outline-none ${loginEmail ? 'bg-gray-200' : ''
+                            className={`flex-1 px-3 py-2 text-gray-700 placeholder-gray-400 focus:outline-none ${email ? 'bg-gray-200' : ''
                                 }`}
                         />
                     </Input>
@@ -104,23 +179,33 @@ const createprofile = () => {
                         <InputField
                             placeholder="Phone Number"
                             value={formData.phoneNumber}
-                            editable={!loginMobile} // Make editable only if not pre-filled
+                            editable={!phoneNumber} // Make editable only if not pre-filled
                             onChangeText={(value) => handleInputChange('phoneNumber', value)}
-                            className={`flex-1 px-3 py-2 text-gray-700 placeholder-gray-400 focus:outline-none ${loginMobile ? 'bg-gray-200' : ''
-                            }`}
+                            className={`flex-1 px-3 py-2 text-gray-700 placeholder-gray-400 focus:outline-none ${phoneNumber ? 'bg-gray-200' : ''
+                                }`}
                         />
                     </Input>
                 </VStack>
             </ScrollView>
 
             {/* Submit Button */}
-            <Box className="p-4">
-                <Button className="bg-primary-50 px-4 py-2 rounded-lg w-full" onPress={handleSubmit}>
-                    <Text className="text-white text-center">Create Profile</Text>
-                </Button>
-            </Box>
+            <Pressable
+                className="w-4/5 rounded-3xl bg-primary-500 mt-4"
+                onPress={handleSubmit}
+            >
+                {isChanging ? (
+                    <HStack className="py-2 justify-center">
+                        <Spinner className="self-center" color="white" />
+                        <Text className="text-secondary-500 font-semibold text-lg">Loading...</Text>
+                    </HStack>
+                ) : (
+                    <HStack className="py-2 justify-center">
+                        <Text className="text-secondary-500 font-semibold text-lg">Verify</Text>
+                    </HStack>
+                )}
+            </Pressable>
         </Box>
     );
 };
 
-export default createprofile;
+export default CreateProfile;

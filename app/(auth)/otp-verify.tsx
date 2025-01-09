@@ -1,18 +1,33 @@
 import { IMAGES } from "@/assets";
+import AppIcon from "@/components/mainComponents/AppIcon";
 import { Center } from "@/components/ui/center";
+import { Divider } from "@/components/ui/divider";
 import { HStack } from "@/components/ui/hstack";
 import { Pressable } from "@/components/ui/pressable";
 import { Spinner } from "@/components/ui/spinner";
 import { Text } from "@/components/ui/text";
+import { Toast, ToastTitle, useToast } from "@/components/ui/toast";
+import { useAuthProvider } from "@/constant/AuthContext";
+import { useAuth } from "@/hooks";
+import { useChange, useFetch } from "@/hooks/useAPI";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { router } from "expo-router";
 import React, { useState, useRef } from "react";
 import { View, TextInput, StyleSheet, Alert, Image } from "react-native";
 
 const OtpVerify = () => {
+    const { setToken, setUser, user } = useAuth();
+    const { loginMobile, loginEmail, loginType } = useAuthProvider();
     const [otp, setOtp] = useState<string[]>(Array(6).fill(""));
     const inputRefs = useRef<Array<TextInput | null>>([]);
+    const toast = useToast();
+    const { change, isChanging } = useChange();
+
+    const { email } = loginEmail || {};
+    const { phoneNumber } = loginMobile || {};
+
 
     const handleChange = (text: string, index: number) => {
-
         if (text.length <= 1) {
             const newOtp = [...otp];
             newOtp[index] = text;
@@ -30,12 +45,145 @@ const OtpVerify = () => {
         }
     };
 
-    const handleSubmit = () => {
-        const enteredOtp = otp.join("");
-        if (enteredOtp.length === 6) {
-            Alert.alert("Success", `Entered OTP: ${enteredOtp}`);
+    const handleSubmit = async () => {
+        if (loginMobile) {
+            console.log(loginMobile)
+            await handleSubmitWithMobile();
+        } else if (loginEmail) {
+            console.log(loginEmail)
+            await handleSubmitWithEmail();
         } else {
-            Alert.alert("Error", "Please enter a valid 6-digit OTP.");
+            toast.show({
+                placement: "top",
+                render: () => (
+                    <Toast className="bg-red-500">
+                        <ToastTitle size="sm">Login type is not specified. Please try again.</ToastTitle>
+                    </Toast>
+                ),
+            });
+        }
+    };
+
+
+    const handleSubmitWithEmail = async () => {
+        const Otp = otp.join("");
+        try {
+            const res = await change(`verifyEmailOtp`, {
+                body: {
+                    email,
+                    otp: Number(Otp),
+                    role: loginType,
+                },
+            });
+            if (res?.results?.success) {
+                await AsyncStorage.setItem('isUserEnter', 'true');
+                const accessToken = res?.results?.token;
+                await setToken(accessToken);
+                const checkUserExists = await change(`check-user-exists`, {
+                    method: 'GET',
+                    body: { email, phoneNumber }
+                });
+                if (checkUserExists) {
+                    toast.show({
+                        placement: "top",
+                        render: () => (
+                            <Toast className="bg-green-500">
+                                <ToastTitle size="sm">Welcome back! Redirecting to home...</ToastTitle>
+                            </Toast>
+                        ),
+                    });
+                    router.push("/(tabs)");
+                } else {
+                    toast.show({
+                        placement: "top",
+                        render: () => (
+                            <Toast className="bg-yellow-500">
+                                <ToastTitle size="sm">Account not found. Redirecting to registration...</ToastTitle>
+                            </Toast>
+                        ),
+                    });
+                    router.push("/create-profile");
+                }
+            } else {
+                toast.show({
+                    placement: "top",
+                    render: () => (
+                        <Toast className="bg-yellow-500">
+                            <ToastTitle size="sm">{res?.results?.message}</ToastTitle>
+                        </Toast>
+                    ),
+                });
+            }
+        } catch (error) {
+            toast.show({
+                placement: "top",
+                render: () => (
+                    <Toast className="bg-red-500">
+                        <ToastTitle size="sm">Invalid OTP. Please try again.</ToastTitle>
+                    </Toast>
+                ),
+            });
+        }
+    };
+
+    const handleSubmitWithMobile = async () => {
+        const Otp = otp.join("");
+        try {
+            const res = await change(`verifyOtp`, {
+                body: {
+                    phoneNumber,
+                    otp: Number(Otp),
+                    role: loginType,
+                },
+            });
+            if (res?.results?.success) {
+                // Check if user exists
+                const {
+                    data: checkUserExists,
+                    mutate: checkUserExistsMutate,
+                    isLoading
+                } = useFetch(`check-user-exists`);
+
+                if (checkUserExists) {
+                    toast.show({
+                        placement: "top",
+                        render: () => (
+                            <Toast className="bg-green-500">
+                                <ToastTitle size="sm">Welcome back! Redirecting to home...</ToastTitle>
+                            </Toast>
+                        ),
+                    });
+                    router.push("/(tabs)");
+                } else {
+                    toast.show({
+                        placement: "top",
+                        render: () => (
+                            <Toast className="bg-yellow-500">
+                                <ToastTitle size="sm">Account not found. Redirecting to registration...</ToastTitle>
+                            </Toast>
+                        ),
+                    });
+                    router.push("/create-profile");
+                }
+            } else {
+                toast.show({
+                    placement: "top",
+                    render: () => (
+                        <Toast className="bg-yellow-500">
+                            <ToastTitle size="sm">{res?.results?.message}</ToastTitle>
+                        </Toast>
+                    ),
+                });
+            }
+        } catch (error) {
+            toast.show({
+                placement: "top",
+                render: () => (
+                    <Toast className="bg-red-500">
+                        <ToastTitle size="sm">Invalid OTP. Please try again.</ToastTitle>
+                    </Toast>
+                ),
+            });
         }
     };
 
@@ -72,7 +220,7 @@ const OtpVerify = () => {
                 className="w-4/5 rounded-3xl bg-primary-500 mt-4"
                 onPress={handleSubmit}
             >
-                {false ? (
+                {isChanging ? (
                     <HStack className="py-2 justify-center">
                         <Spinner className="self-center" color="white" />
                         <Text className="text-secondary-500 font-semibold text-lg">Loading...</Text>
