@@ -2,6 +2,7 @@ import localStorage from '@react-native-async-storage/async-storage';
 import {create} from 'zustand';
 import {User} from '../types';
 import {BASE_URL} from '../utils';
+import { router } from 'expo-router';
 
 
 type AuthState = {
@@ -21,10 +22,12 @@ const useAuth = create<AuthState>(set => ({
     });
   },
   async setToken(accessToken) {
+    router.replace('/(tabs)')
     await localStorage.setItem('accessToken', accessToken);
   },
   async logout() {
     set({user: undefined});
+    router.replace('/(auth)');
     await localStorage.removeItem('accessToken');
   },
   getUser: async () => {

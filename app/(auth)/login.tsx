@@ -40,7 +40,7 @@ export default function Login(): JSX.Element {
     const toast = useToast();
     const { setLoginEmail } = useAuthProvider();
     const { type } = useLocalSearchParams();
-    const { setUser } = useAuth();
+    const { setToken } = useAuth();
     const { change, isChanging } = useChange();
     const router = useRouter();
     const {
@@ -130,7 +130,7 @@ export default function Login(): JSX.Element {
                 <HStack className="justify-end mx-4 mt-2">
                     <Button
                         className="p-2 px-4 bg-white rounded-full"
-                        onPress={() => setUser({})}
+                        onPress={() => setToken("unknown-user001")}
                         variant={'outline'}
                         size={'sm'}
                     >
